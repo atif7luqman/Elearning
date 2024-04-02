@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+
+        .user-list {
+            margin-bottom: 20px;
+        }
+
+        .user-item {
+            display: block;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .user-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .user-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .message-container.sender {
+            justify-content: flex-end;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            margin-right: 10px;
+        }
+
+        .message.sender {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+        }
+
+        .message.receiver {
+            background-color: #E5E5EA;
+            align-self: flex-start;
+        }
+
+        .message .meta {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #777;
+        }
+
+        .initials {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 0 4px 4px 0;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <section>
+    <div class="chat-container">
+        <div class="user-list" id="userList">
+            <!-- User list will be dynamically populated here -->
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Chat messages will be displayed here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    </section>
+
+    <script>
+        const users = ["Aqib Rasool", "Muhammad Nabeel", "Umair Ahmed"]; // Add more users as needed
+
+        const userList = document.getElementById("userList");
+
+        users.forEach(user => {
+            const userItem = document.createElement("div");
+            userItem.classList.add("user-item");
+            userItem.textContent = user;
+            userItem.addEventListener("click", () => selectUser(userItem, user));
+            userList.appendChild(userItem);
+        });
+
+        let selectedUserItem = null;
+
+        function selectUser(userItem, user) {
+            if (selectedUserItem) {
+                selectedUserItem.classList.remove("selected");
+            }
+            userItem.classList.add("selected");
+            selectedUserItem = userItem;
+            // Update chat messages based on selected user
+            updateChatMessages(user);
+        }
+
+        function updateChatMessages(user) {
+            // Clear existing messages
+            const chatMessages = document.getElementById("chatMessages");
+            chatMessages.innerHTML = "";
+
+            // Add dummy messages for demonstration
+            const dummyMessages = [
+                { sender: "Aqib Rasool", message: "Hello there!" },
+                { sender: user, message: "Hi! How are you?" },
+                { sender: "Aqib Rasool", message: "I'm doing good, thanks!" },
+                { sender: user, message: "That's great to hear!" }
+            ];
+
+            dummyMessages.forEach(msg => {
+                const messageContainer = document.createElement("div");
+                messageContainer.classList.add("message-container", msg.sender === user ? "receiver" : "sender");
+
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", msg.sender === user ? "receiver" : "sender");
+                messageElement.textContent = msg.message;
+
+                const initialsElement = document.createElement("div");
+                initialsElement.classList.add("initials");
+                initialsElement.textContent = getInitials(msg.sender);
+
+                const metaElement = document.createElement("div");
+                metaElement.classList.add("meta");
+                metaElement.textContent = msg.sender === user ? user : "You";
+
+                messageContainer.appendChild(initialsElement);
+                messageContainer.appendChild(messageElement);
+                messageContainer.appendChild(metaElement);
+                chatMessages.appendChild(messageContainer);
+            });
+
+            // Scroll to the bottom of the chat container
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+            const selectedUser = document.querySelector(".user-item.selected");
+
+            if (!selectedUser) {
+                alert("Please select a user to chat with.");
+                return;
+            }
+
+            if (message !== "") {
+                const messageContainer = document.createElement("div");
+                messageContainer.classList.add("message-container", "sender");
+
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", "sender");
+                messageElement.textContent = message;
+
+                const initialsElement = document.createElement("div");
+                initialsElement.classList.add("initials");
+                initialsElement.textContent = "You";
+
+                const metaElement = document.createElement("div");
+                metaElement.classList.add("meta");
+                metaElement.textContent = "You";
+
+                messageContainer.appendChild(initialsElement);
+                messageContainer.appendChild(messageElement);
+                messageContainer.appendChild(metaElement);
+
+                const chatMessages = document.getElementById("chatMessages");
+                chatMessages.appendChild(messageContainer);
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Clear the input field after sending message
+                messageInput.value = "";
+
+                // Simulate receiving a response after a short delay
+                setTimeout(() => receiveResponse(selectedUser.textContent), 1000);
+            }
+        }
+
+        function receiveResponse(selectedUserName) {
+            const responseMessages = {
+                "Aqib Rasool": ["Hello!", "How can I help you?", "Let me know if you have any questions."],
+                "Muhammad Nabeel": ["Hi there!", "I'm available to chat.", "What do you need assistance with?"],
+                "Umair Ahmed": ["Welcome!", "Feel free to ask me anything.", "I'm here to support you."]
+                // Add more responses for additional users
+            };
+            const userResponses = responseMessages[selectedUserName];
+            const randomIndex = Math.floor(Math.random() * userResponses.length);
+            const response = userResponses[randomIndex];
+
+            const messageContainer = document.createElement("div");
+            messageContainer.classList.add("message-container", "receiver");
+
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", "receiver");
+            messageElement.textContent = response;
+
+            const initialsElement = document.createElement("div");
+            initialsElement.classList.add("initials");
+            initialsElement.textContent = getInitials(selectedUserName);
+
+            const metaElement = document.createElement("div");
+            metaElement.classList.add("meta");
+            metaElement.textContent = selectedUserName;
+
+            messageContainer.appendChild(initialsElement);
+            messageContainer.appendChild(messageElement);
+            messageContainer.appendChild(metaElement);
+
+            const chatMessages = document.getElementById("chatMessages");
+            chatMessages.appendChild(messageContainer);
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getInitials(name) {
+            const words = name.split(" ");
+            const initials = words.map(word => word.charAt(0).toUpperCase()).join("");
+            return initials;
+        }
+    </script>
+</body>
+</html>

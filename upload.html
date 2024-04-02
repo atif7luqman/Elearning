@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .document-list {
+            max-width: 500px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .document-list h3 {
+            text-align: center;
+        }
+
+        .document-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .document-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .document-list li i {
+            margin-right: 10px;
+        }
+
+        .document-list li a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .document-list li .format {
+            font-size: 12px;
+            color: #666;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <section>
+    <h2>Upload Documents</h2>
+    <form id="uploadForm">
+        <label for="documentTitle">Document Title:</label>
+        <input type="text" id="documentTitle" name="documentTitle">
+        
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="4" cols="50"></textarea>
+        
+        <label for="file">Select File:</label>
+        <input type="file" id="file" name="file">
+        
+        <div class="clearfix">
+            <button type="button" onclick="uploadDocument()">Upload Document</button>
+        </div>
+    </form>
+
+    <div class="document-list" id="documentList">
+        <h3>Documents</h3>
+        <ul id="uploadedDocuments">
+            <!-- Uploaded documents will be listed here -->
+        </ul>
+    </div>
+    </section>
+
+    <script>
+        function uploadDocument() {
+            const title = document.getElementById("documentTitle").value;
+            const description = document.getElementById("description").value;
+            const fileInput = document.getElementById("file");
+
+            if (!title || !description || !fileInput.files[0]) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+
+                // Save document details to local storage
+                const document = {
+                    title: title,
+                    description: description,
+                    content: fileContent,
+                    format: getFileFormat(file.type)
+                };
+
+                // Check if documents array already exists in local storage
+                let documents = JSON.parse(localStorage.getItem("documents")) || [];
+                documents.push(document);
+                localStorage.setItem("documents", JSON.stringify(documents));
+
+                // Update document list
+                updateDocumentList();
+            };
+
+            // Read the file as text
+            reader.readAsText(file);
+        }
+
+        function getFileFormat(fileType) {
+            const format = fileType.split('/')[1]; // Extract file format
+            return format ? format.toUpperCase() : 'Unknown';
+        }
+
+        function updateDocumentList() {
+            const uploadedDocuments = document.getElementById("uploadedDocuments");
+            uploadedDocuments.innerHTML = "";
+
+            // Retrieve documents from local storage
+            const documents = JSON.parse(localStorage.getItem("documents")) || [];
+
+            // Display each document in the list
+            documents.forEach((document, index) => {
+                uploadedDocuments.innerHTML += `
+                    <li>
+                        <i class="fas fa-file"></i>
+                        <a href="#">${document.title}</a>
+                        <span class="format">(${document.format})</span>
+                    </li>`;
+            });
+        }
+
+        // Initial update of document list when the page loads
+        updateDocumentList();
+    </script>
+</body>
+</html>
